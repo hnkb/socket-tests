@@ -1,0 +1,56 @@
+
+#BasedOnStyle: LLVM
+
+AccessModifierOffset: -4
+AlignAfterOpenBracket: AlwaysBreak
+AllowAllArgumentsOnNextLine: false
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortFunctionsOnASingleLine: InlineOnly
+#AllowShortLambdasOnASingleLine: All                   # (default is "All", other options: None, Empty, Inline)
+AlwaysBreakBeforeMultilineStrings: true
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterClass: true
+  AfterControlStatement: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: true
+  BeforeElse: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+BreakBeforeBraces: Custom
+BreakBeforeBinaryOperators: NonAssignment              # (None, NonAssignment, All)
+BreakBeforeTernaryOperators: false
+#BreakStringLiterals: false
+ColumnLimit: 100
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+Cpp11BracedListStyle: false
+FixNamespaceComments: false
+IndentCaseLabels: true
+IndentPPDirectives: AfterHash
+IndentWidth: 4
+IndentWrappedFunctionNames: true
+MaxEmptyLinesToKeep: 3
+NamespaceIndentation: All
+PointerAlignment: Left
+ReflowComments: true
+SortIncludes: false
+#SortUsingDeclarations: false
+SpaceBeforeCpp11BracedList: true
+SpacesBeforeTrailingComments: 2
+TabWidth: 4
+UseTab: ForContinuationAndIndentation
+
+
+
+# temporary for disabling parts of stylesheet
+
+#ColumnLimit: 0
+#CommentPragmas: '^[^ ]'
+#DisableFormat: true
