@@ -1,6 +1,6 @@
 
 #include "crib-socket.h"
-#include <cstring>
+#include "chat.h"
 #include <iostream>
 
 
@@ -16,17 +16,9 @@ void client(const char* server_ip_address)
 	if (connect(sock, (sockaddr*)&address, sizeof(address)) < 0)
 		throw Socket::lastError();
 
-	std::cout << "Connected to server " << server_ip_address << "...\n";
+	std::cout << "Connected to server " << server_ip_address << ". You can now chat...\n";
 
-
-	char buffer[1024];
-
-	fgets(buffer, sizeof(buffer), stdin);
-	auto sent = send(sock, buffer, strlen(buffer), 0);
-
-	auto received = recv(sock, buffer, sizeof(buffer), 0);
-	buffer[received] = 0;
-	std::cout << " [server]: " << buffer << "\n";
+	chat(sock);
 }
 
 int main()
