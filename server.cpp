@@ -1,7 +1,5 @@
 
 #include "crib-socket.h"
-#include <arpa/inet.h>
-
 #include <cstring>
 #include <iostream>
 
