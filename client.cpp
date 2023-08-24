@@ -6,6 +6,16 @@
 
 void client(const char* server_ip_address)
 {
+	//Socket s("localhost", "HTTPS");
+	//Socket p("127.0.0.1", "HTTPS");
+	//Socket q("localhost", "80");
+	//Socket q1("localhost", "16432");
+	//Socket q2("52.59.194.5", "16432");
+	//Socket q3("dev.hnkb.de", "HTTP");
+
+	//return;
+
+
 	Socket sock(AF_INET, SOCK_STREAM, 0);
 
 	sockaddr_in address;
@@ -25,8 +35,8 @@ int main()
 {
 	try
 	{
-		client("127.0.0.1");
-		// client("52.59.194.5");
+		// client("127.0.0.1");
+		client("52.59.194.5");
 	}
 	catch (const std::exception& ex)
 	{

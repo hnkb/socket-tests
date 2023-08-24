@@ -1,12 +1,53 @@
 
 #include "crib-socket.h"
-
+#include <iostream>
 
 Socket::Socket(int domain, int type, int protocol)
 {
 	fd = socket(domain, type, protocol);
 	if (fd == -1)
 		throw lastError();
+}
+
+Socket::Socket(const char* nodeName, const char* serviceName)
+{
+	addrinfo hints;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_CANONNAME;
+	// hints.ai_protocol = IPPROTO_TCP;
+
+	addrinfo* result = nullptr;
+	auto ret = getaddrinfo(nodeName, serviceName, &hints, &result);
+	if (ret != 0)
+	{
+		printf("getaddrinfo failed with error: %d\n", ret);
+		return;
+	}
+
+	for (auto ptr = result; ptr != nullptr; ptr = ptr->ai_next)
+	{
+		std::cout << "Family: " << ptr->ai_family << ", Protocol: " << ptr->ai_protocol
+				  << ", Address length: " << ptr->ai_addrlen << "\n";
+
+		char buf[INET6_ADDRSTRLEN], ser[500];
+		//inet_ntop(ptr->ai_addr->sa_family, ptr->ai_addr->sa_data, buf, sizeof(buf));
+		getnameinfo(
+			ptr->ai_addr,
+			ptr->ai_addrlen,
+			buf,
+			sizeof(buf),
+			ser,
+			sizeof(ser),
+			NI_NUMERICHOST | NI_NUMERICSERV);
+		std::cout << "   " << buf << "         " << ser << "\n";
+		if (ptr->ai_canonname)
+		std::cout << "   " << ptr->ai_canonname << "\n";
+		// iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+	}
+
+	freeaddrinfo(result);
 }
 
 

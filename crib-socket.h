@@ -16,6 +16,7 @@ class Socket
 {
 public:
 	Socket(int domain, int type, int protocol);
+	Socket(const char* nodeName, const char* serviceName);
 	~Socket();
 
 	static std::system_error lastError();
