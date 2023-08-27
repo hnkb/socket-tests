@@ -1,6 +1,9 @@
 
 #include "crib-socket.h"
 #include <iostream>
+// #include <sys/types.h>
+// #include <sys/socket.h>
+#	include <unistd.h>
 
 Socket::Socket(int domain, int type, int protocol)
 {
@@ -9,20 +12,24 @@ Socket::Socket(int domain, int type, int protocol)
 		throw lastError();
 }
 
-Socket::Socket(const char* nodeName, const char* serviceName)
+Socket::Socket(const char* nodeName, const char* serviceName, bool isPassive, int type)
 {
 	addrinfo hints;
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_CANONNAME;
+	hints.ai_socktype = type;
+	// hints.ai_flags = AI_CANONNAME;
 	// hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = isPassive ? 0 : AI_PASSIVE;
 
 	addrinfo* result = nullptr;
 	auto ret = getaddrinfo(nodeName, serviceName, &hints, &result);
 	if (ret != 0)
 	{
-		printf("getaddrinfo failed with error: %d\n", ret);
+		printf(
+			"getaddrinfo failed with error: %d\n%s\n\n",
+			ret,
+			std::system_error(std::error_code(ret, std::generic_category())).what());
 		return;
 	}
 
@@ -32,7 +39,7 @@ Socket::Socket(const char* nodeName, const char* serviceName)
 				  << ", Address length: " << ptr->ai_addrlen << "\n";
 
 		char buf[INET6_ADDRSTRLEN], ser[500];
-		//inet_ntop(ptr->ai_addr->sa_family, ptr->ai_addr->sa_data, buf, sizeof(buf));
+		// inet_ntop(ptr->ai_addr->sa_family, ptr->ai_addr->sa_data, buf, sizeof(buf));
 		getnameinfo(
 			ptr->ai_addr,
 			ptr->ai_addrlen,
@@ -40,14 +47,34 @@ Socket::Socket(const char* nodeName, const char* serviceName)
 			sizeof(buf),
 			ser,
 			sizeof(ser),
-			NI_NUMERICHOST | NI_NUMERICSERV);
+			0 | NI_NUMERICHOST | NI_NUMERICSERV);
 		std::cout << "   " << buf << "         " << ser << "\n";
 		if (ptr->ai_canonname)
-		std::cout << "   " << ptr->ai_canonname << "\n";
-		// iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+			std::cout << "   " << ptr->ai_canonname << "\n";
+
+		fd = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+		if (fd == -1)
+			throw lastError();
+
+		int iResult;
+		if (isPassive)
+			iResult = bind(fd, ptr->ai_addr, ptr->ai_addrlen);
+		else
+			iResult = connect(fd, ptr->ai_addr, (int)ptr->ai_addrlen);
+		if (iResult < 0)
+		{
+			// closesocket(fd);
+			close(fd);
+			fd = -1;
+			continue;
+		}
+		break;
 	}
 
 	freeaddrinfo(result);
+
+	if (fd == -1)
+		throw lastError();
 }
 
 

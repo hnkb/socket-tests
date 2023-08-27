@@ -5,7 +5,8 @@
 
 #if !defined(_WIN32)
 #	include <sys/socket.h>
-#	include <arpa/inet.h>
+// #	include <arpa/inet.h>
+#	include <netdb.h>
 #else
 #	include <winsock2.h>
 #	include <ws2tcpip.h>
@@ -16,7 +17,11 @@ class Socket
 {
 public:
 	Socket(int domain, int type, int protocol);
-	Socket(const char* nodeName, const char* serviceName);
+	Socket(
+		const char* nodeName,
+		const char* serviceName,
+		bool isPassive = false,
+		int type = SOCK_STREAM);
 	~Socket();
 
 	static std::system_error lastError();
