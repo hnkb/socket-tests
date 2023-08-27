@@ -1,14 +1,25 @@
 
 #include "chat.h"
-#include <cstring>
 #include <iostream>
-
-#include <unistd.h>
-#include <poll.h>
 
 
 void chat(Socket& sock)
 {
+	char buffer[1024];
+
+
+	const HANDLE sources[] { GetStdHandle(STD_INPUT_HANDLE), WSACreateEvent() };
+	WSAEventSelect(sock, sources[1], FD_READ | FD_OOB | FD_CLOSE);
+
+	for (int i = 0; i < 3; i++)
+	{
+		auto result = WaitForMultipleObjectsEx(2, sources, FALSE, INFINITE, FALSE);
+
+		std::cout << "Return value " << result << "\n";
+		fgets(buffer, sizeof(buffer), stdin);
+	}
+
+#if 0
 	pollfd sources[] {
 		{ STDIN_FILENO, POLLIN, 0 },
 		{ (int)sock,    POLLIN, 0 }
@@ -57,4 +68,5 @@ void chat(Socket& sock)
 				throw Socket::lastError();
 		}
 	}
+#endif
 }
