@@ -23,7 +23,7 @@ void chat(Socket& sock)
 
 		if (sources[1].revents & (POLLERR | POLLHUP))
 		{
-			std::cout << "Connection closed by the other party.\n";
+			std::cout << "Connection closed by the other party.\n\n";
 			break;
 		}
 
@@ -31,6 +31,11 @@ void chat(Socket& sock)
 		{
 			auto received = recv(sock, buffer, sizeof(buffer), 0);
 			buffer[received] = 0;
+			if (received == 0)
+			{
+				std::cout << "Connection closed by the other party.\n\n";
+				break;
+			}
 			std::cout << " [other]: " << buffer << "\n";
 		}
 
