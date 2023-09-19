@@ -3,31 +3,59 @@
 #include <cstring>
 #include <iostream>
 
-#include <unistd.h>
-#include <poll.h>
+
+#if !defined(_WIN32)
+
+#	include <unistd.h>
+#	include <poll.h>
+
+class combinedPoll
+{
+public:
+	combinedPoll(Socket& sock)
+	{
+		sources[0].fd = STDIN_FILENO;
+		sources[0].events = POLLIN;
+		sources[1].fd = sock;
+		sources[1].events = POLLIN;
+	}
+
+	void poll()
+	{
+		::poll(sources, sizeof(sources) / sizeof(pollfd), -1);
+		// TODO: check poll() return value for error
+	}
+
+	bool socketClosed() const { return sources[1].revents & (POLLERR | POLLHUP); }
+	bool socketHasData() const { return sources[1].revents & POLLIN; }
+	bool stdinHasData() const { return sources[0].revents & POLLIN; }
+
+private:
+	pollfd sources[2];
+};
+
+#else
+
+#endif
 
 
 void chat(Socket& sock)
 {
-	pollfd sources[] {
-		{ STDIN_FILENO, POLLIN, 0 },
-		{ (int)sock,    POLLIN, 0 }
-	};
+	combinedPoll sources(sock);
 
 	char buffer[1024];
 
 	while (true)
 	{
-		poll(sources, sizeof(sources) / sizeof(pollfd), -1);
-		// TODO: check poll() return value for error
+		sources.poll();
 
-		if (sources[1].revents & (POLLERR | POLLHUP))
+		if (sources.socketClosed())
 		{
 			std::cout << "Connection closed by the other party.\n\n";
 			break;
 		}
 
-		if (sources[1].revents & POLLIN)
+		if (sources.socketHasData())
 		{
 			auto received = recv(sock, buffer, sizeof(buffer), 0);
 			buffer[received] = 0;
@@ -39,7 +67,7 @@ void chat(Socket& sock)
 			std::cout << " [other]: " << buffer << "\n";
 		}
 
-		if (sources[0].revents & POLLIN)
+		if (sources.stdinHasData())
 		{
 			fgets(buffer, sizeof(buffer), stdin);
 			auto len = strlen(buffer);
